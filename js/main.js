@@ -1,18 +1,10 @@
 ﻿/**
- * D&A Web Studio - Main Controller (Performance & Accessibility Optimized)
- * Zero Forced Reflows • WCAG AAA Accessible • Throttled Interactions
+ * D&A Web Studio - Optimized Production Main Script
+ * Zero CLS • Zero Forced Reflows • Instant Interaction
  */
 
 document.addEventListener("DOMContentLoaded", () => {
   initTheme();
-  renderFounders();
-  renderServices();
-  renderCaseStudies();
-  renderProcess();
-  renderPrinciples();
-  renderEstimator();
-  renderTestimonials();
-  renderFaqs();
   initTiltCards();
   initTypewriter();
   initScratchCard();
@@ -26,7 +18,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 /* ==========================================================================
-   1. Theme Switcher (Accessible & High Contrast)
+   1. Theme Switcher
    ========================================================================== */
 function initTheme() {
   const toggleBtn = document.getElementById("theme-toggle");
@@ -62,105 +54,10 @@ function updateThemeIcon(isLight) {
 }
 
 /* ==========================================================================
-   2. Render Founders (Semantic & High Contrast)
+   2. Service Modals
    ========================================================================== */
-function renderFounders() {
-  const container = document.getElementById("founders-container");
-  if (!container || !studioData.founders) return;
-
-  container.innerHTML = studioData.founders.map(founder => `
-    <article class="tilt-card glass-panel rounded-3xl p-6 lg:p-8 flex flex-col md:flex-row gap-8 items-start border border-slate-200 dark:border-white/10 transition-all shadow-sm" aria-label="Founder profile for ${founder.name}">
-      <div class="tilt-inner w-full md:w-5/12 shrink-0">
-        <div class="founder-portrait rounded-2xl border border-slate-200 dark:border-white/15 overflow-hidden shadow-md relative">
-          <img src="${founder.image}" alt="Portrait of ${founder.name}, ${founder.role}" width="400" height="480" loading="lazy" class="w-full h-full object-cover">
-          <div class="absolute bottom-3 left-3 right-3 z-10">
-            <span class="inline-block px-3 py-1 bg-white/95 dark:bg-emerald-950/90 backdrop-blur-md border border-emerald-600/30 text-emerald-900 dark:text-emerald-200 text-xs font-bold rounded-full uppercase tracking-wider shadow-sm">
-              ${founder.role.split('/')[0].trim()}
-            </span>
-          </div>
-        </div>
-      </div>
-      <div class="tilt-inner flex-1 flex flex-col justify-between h-full">
-        <div>
-          <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-mono uppercase tracking-widest text-emerald-800 dark:text-emerald-400 font-bold">${founder.role}</span>
-          </div>
-          <h3 class="text-2xl lg:text-3xl font-extrabold text-slate-900 dark:text-white mb-2 font-display">${founder.name}</h3>
-          <p class="text-emerald-800 dark:text-emerald-300 text-sm font-semibold italic mb-4">"${founder.tagline}"</p>
-          <p class="text-slate-700 dark:text-slate-200 text-sm leading-relaxed mb-6">${founder.bio}</p>
-          
-          <div class="space-y-2.5 mb-6">
-            ${founder.points.map(pt => `
-              <div class="flex items-start gap-2.5 text-xs text-slate-700 dark:text-slate-300 font-medium">
-                <span class="text-emerald-700 dark:text-emerald-400 mt-0.5" aria-hidden="true">✦</span>
-                <span>${pt}</span>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-
-        <div>
-          <div class="flex flex-wrap gap-1.5 mb-6" aria-label="Specialties">
-            ${founder.skills.map(skill => `
-              <span class="px-2.5 py-1 rounded-md bg-emerald-50 dark:bg-white/5 border border-emerald-300 dark:border-white/10 text-[11px] font-semibold text-emerald-900 dark:text-slate-200">
-                ${skill}
-              </span>
-            `).join('')}
-          </div>
-          <div class="pt-4 border-t border-slate-200 dark:border-white/10 flex items-center justify-between">
-            <a href="${founder.socials.email}" aria-label="Send an email to ${founder.name}" class="inline-flex items-center gap-2 text-xs font-bold text-emerald-800 dark:text-emerald-300 hover:text-emerald-600 transition-colors">
-              <i data-lucide="mail" class="w-3.5 h-3.5" aria-hidden="true"></i> Connect with ${founder.name.split(' ')[0]} ↗
-            </a>
-            <span class="text-[11px] text-slate-500 font-medium">Co-Founder D&A</span>
-          </div>
-        </div>
-      </div>
-    </article>
-  `).join('');
-}
-/* ==========================================================================
-   3. Render Services Grid & Accessible Modals
-   ========================================================================== */
-function renderServices() {
-  const container = document.getElementById("services-grid");
-  if (!container || !studioData.services) return;
-
-  container.innerHTML = studioData.services.map(srv => `
-    <div role="button" tabindex="0" aria-label="View details for ${srv.title}" class="tilt-card glass-panel rounded-2xl p-6 lg:p-7 flex flex-col justify-between border border-slate-200 dark:border-white/10 hover:border-emerald-600 group transition-all cursor-pointer shadow-sm focus:ring-2 focus:ring-emerald-600" onclick="openServiceModal('${srv.id}')" onkeydown="if(event.key==='Enter'||event.key===' ')openServiceModal('${srv.id}')">
-      <div>
-        <div class="flex items-center justify-between mb-5">
-          <span class="text-xs font-mono text-emerald-800 dark:text-emerald-400 font-bold tracking-wider">${srv.num} / ${srv.category}</span>
-          <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/30 text-[10px] font-bold text-emerald-900 dark:text-emerald-200">
-            ${srv.badge}
-          </span>
-        </div>
-        <div class="w-12 h-12 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-300 dark:border-emerald-500/30 flex items-center justify-center text-emerald-800 dark:text-emerald-300 mb-4 group-hover:scale-105 transition-transform" aria-hidden="true">
-          <i data-lucide="${srv.icon}" class="w-6 h-6"></i>
-        </div>
-        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2.5 font-display group-hover:text-emerald-800 dark:group-hover:text-emerald-300 transition-colors">${srv.title}</h3>
-        <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed mb-6">${srv.shortDesc}</p>
-        
-        <ul class="space-y-2 mb-6 text-xs text-slate-700 dark:text-slate-300 font-medium">
-          ${srv.features.slice(0, 3).map(f => `
-            <li class="flex items-center gap-2">
-              <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-700 dark:text-emerald-400 shrink-0" aria-hidden="true"></i>
-              <span>${f}</span>
-            </li>
-          `).join('')}
-        </ul>
-      </div>
-
-      <div class="pt-4 border-t border-slate-200 dark:border-white/10 flex items-center justify-between">
-        <span class="text-xs font-bold text-emerald-800 dark:text-emerald-400 group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
-          Explore Deliverables <i data-lucide="arrow-up-right" class="w-3.5 h-3.5" aria-hidden="true"></i>
-        </span>
-        <span class="text-[11px] text-slate-500 font-mono font-medium">D&A Standard</span>
-      </div>
-    </div>
-  `).join('');
-}
-
 window.openServiceModal = function(serviceId) {
+  if (typeof studioData === "undefined" || !studioData.services) return;
   const service = studioData.services.find(s => s.id === serviceId);
   if (!service) return;
 
@@ -178,7 +75,7 @@ window.openServiceModal = function(serviceId) {
           <h2 class="text-xl font-bold text-slate-900 dark:text-white font-display">${service.title}</h2>
         </div>
       </div>
-      <button onclick="closeModal()" aria-label="Close service details modal" class="p-2 rounded-lg bg-slate-100 dark:bg-white/5 hover:bg-slate-200 text-slate-700 dark:text-slate-300 transition-colors">
+      <button onclick="closeModal()" type="button" aria-label="Close service details modal" class="p-2 rounded-lg bg-slate-100 dark:bg-white/5 hover:bg-slate-200 text-slate-700 dark:text-slate-300 transition-colors">
         <i data-lucide="x" class="w-5 h-5" aria-hidden="true"></i>
       </button>
     </div>
@@ -221,71 +118,37 @@ window.openServiceModal = function(serviceId) {
 };
 
 /* ==========================================================================
-   4. Render Case Studies & Interactive Filter Tabs
+   3. Case Studies Filter & Modal
    ========================================================================== */
-function renderCaseStudies(filter = "All") {
-  const container = document.getElementById("case-studies-grid");
-  if (!container || !studioData.caseStudies) return;
-
-  const filtered = filter === "All"
-    ? studioData.caseStudies
-    : studioData.caseStudies.filter(c => c.category.toLowerCase().includes(filter.toLowerCase()));
-
-  container.innerHTML = filtered.map(item => `
-    <article class="tilt-card glass-panel rounded-2xl overflow-hidden border border-slate-200 dark:border-white/10 hover:border-emerald-600 transition-all flex flex-col justify-between group shadow-sm" aria-label="Case study: ${item.title}">
-      <div class="relative h-48 overflow-hidden bg-slate-800">
-        <img src="${item.image}" alt="Screenshot preview for ${item.title}" width="800" height="400" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
-        <div class="absolute top-3 left-3">
-          <span class="px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md border border-white/20 text-[11px] font-bold text-white">
-            ${item.category}
-          </span>
-        </div>
-        <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between">
-          <span class="text-xs font-bold text-emerald-300 font-mono bg-slate-950/90 px-2.5 py-1 rounded-md border border-emerald-500/40">
-            ${item.metric}
-          </span>
-          <span class="text-[11px] text-slate-200 font-mono bg-black/70 px-2 py-0.5 rounded font-medium">
-            ${item.duration}
-          </span>
-        </div>
-      </div>
-
-      <div class="p-6 flex-1 flex flex-col justify-between">
-        <div>
-          <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2 font-display group-hover:text-emerald-800 dark:group-hover:text-emerald-300 transition-colors">${item.title}</h3>
-          <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed mb-4">${item.description}</p>
-        </div>
-
-        <div>
-          <div class="flex flex-wrap gap-1.5 mb-4">
-            ${item.tags.map(t => `<span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-white/5 text-[10px] font-semibold text-slate-700 dark:text-slate-300">${t}</span>`).join('')}
-          </div>
-          <button onclick="openCaseModal('${item.id}')" aria-label="Inspect architecture for ${item.title}" class="w-full py-2.5 rounded-xl bg-slate-50 dark:bg-white/5 hover:bg-emerald-50 dark:hover:bg-emerald-500/20 border border-slate-200 dark:border-white/10 hover:border-emerald-600 text-xs font-bold text-emerald-900 dark:text-emerald-200 transition-all flex items-center justify-center gap-1.5">
-            <span>Inspect Architecture</span> <i data-lucide="arrow-up-right" class="w-3.5 h-3.5" aria-hidden="true"></i>
-          </button>
-        </div>
-      </div>
-    </article>
-  `).join('');
-
-  if (typeof lucide !== "undefined") lucide.createIcons();
-}
-
 window.filterCaseStudies = function(category, btnElement) {
   document.querySelectorAll(".filter-btn").forEach(btn => {
     btn.classList.remove("btn-primary", "text-white", "font-bold");
     btn.classList.add("bg-white", "dark:bg-white/5", "text-slate-800", "dark:text-slate-200");
+    btn.setAttribute("aria-selected", "false");
   });
   if (btnElement) {
     btnElement.classList.remove("bg-white", "dark:bg-white/5", "text-slate-800", "dark:text-slate-200");
     btnElement.classList.add("btn-primary", "text-white", "font-bold");
+    btnElement.setAttribute("aria-selected", "true");
   }
-  renderCaseStudies(category);
-  initTiltCards();
+
+  const cards = document.querySelectorAll("#case-studies-grid article");
+  cards.forEach(card => {
+    if (category === "All") {
+      card.style.display = "flex";
+    } else {
+      const cardCat = card.querySelector(".bg-black\\/70")?.innerText || "";
+      if (cardCat.toLowerCase().includes(category.toLowerCase())) {
+        card.style.display = "flex";
+      } else {
+        card.style.display = "none";
+      }
+    }
+  });
 };
 
 window.openCaseModal = function(caseId) {
+  if (typeof studioData === "undefined" || !studioData.caseStudies) return;
   const item = studioData.caseStudies.find(c => c.id === caseId);
   if (!item) return;
 
@@ -298,13 +161,13 @@ window.openCaseModal = function(caseId) {
         <span class="text-xs font-mono text-emerald-800 dark:text-emerald-400 uppercase tracking-widest font-bold">${item.client}</span>
         <h2 class="text-xl font-bold text-slate-900 dark:text-white font-display">${item.title}</h2>
       </div>
-      <button onclick="closeModal()" aria-label="Close case study modal" class="p-2 rounded-lg bg-slate-100 dark:bg-white/5 text-slate-700 hover:text-slate-900 transition-colors">
+      <button onclick="closeModal()" type="button" aria-label="Close case study modal" class="p-2 rounded-lg bg-slate-100 dark:bg-white/5 text-slate-700 hover:text-slate-900 transition-colors">
         <i data-lucide="x" class="w-5 h-5" aria-hidden="true"></i>
       </button>
     </div>
 
     <div class="rounded-xl overflow-hidden mb-6 max-h-60 border border-slate-200 dark:border-white/10 bg-slate-900">
-      <img src="${item.image}" alt="Screenshot for ${item.title}" width="800" height="400" loading="lazy" class="w-full h-full object-cover">
+      <img src="${item.image}" alt="Screenshot for ${item.title}" width="600" height="300" loading="lazy" class="w-full h-full object-cover">
     </div>
 
     <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
@@ -344,49 +207,15 @@ window.closeModal = function() {
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeModal();
 });
-/* ==========================================================================
-   5. Render Principles & Process
-   ========================================================================== */
-function renderPrinciples() {
-  const container = document.getElementById("principles-grid");
-  if (!container || !studioData.principles) return;
-
-  container.innerHTML = studioData.principles.map(p => `
-    <div class="tilt-card glass-panel rounded-2xl p-6 border border-slate-200 dark:border-white/10 hover:border-emerald-600 transition-all shadow-sm">
-      <div class="text-xs font-mono text-emerald-800 dark:text-emerald-400 font-bold mb-3">${p.num} / STANDARD</div>
-      <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2 font-display">${p.title}</h3>
-      <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed font-normal">${p.description}</p>
-    </div>
-  `).join('');
-}
-
-function renderProcess() {
-  const container = document.getElementById("process-steps");
-  if (!container || !studioData.process) return;
-
-  container.innerHTML = studioData.process.map(step => `
-    <div class="relative p-6 rounded-2xl glass-panel border border-slate-200 dark:border-white/10 hover:border-emerald-600 transition-all shadow-sm">
-      <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-300 dark:border-emerald-500/30 text-emerald-900 dark:text-emerald-200 font-mono font-bold flex items-center justify-center mb-4" aria-hidden="true">
-        ${step.step}
-      </div>
-      <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2 font-display">${step.title}</h3>
-      <p class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed font-normal">${step.desc}</p>
-    </div>
-  `).join('');
-}
 
 /* ==========================================================================
-   6. Interactive Project Scope Estimator
+   4. Scope Estimator
    ========================================================================== */
 let estimatorState = {
   serviceId: "web",
   pageTier: "single",
   selectedAddons: new Set()
 };
-
-function renderEstimator() {
-  calculateEstimatorTotal();
-}
 
 window.selectEstimatorService = function(serviceId, el) {
   estimatorState.serviceId = serviceId;
@@ -414,6 +243,7 @@ window.toggleEstimatorAddon = function(addonId, el) {
 };
 
 function calculateEstimatorTotal() {
+  if (typeof studioData === "undefined" || !studioData.estimator) return;
   const { serviceTypes, pagesCount, addons } = studioData.estimator;
   
   const currentService = serviceTypes.find(s => s.id === estimatorState.serviceId) || serviceTypes[0];
@@ -435,11 +265,12 @@ function calculateEstimatorTotal() {
       .filter(Boolean);
     deliverablesEl.innerText = addonNames.length > 0 
       ? `Includes: Core Architecture + ${addonNames.join(", ")}` 
-      : "Includes: Full Design, 3D WebGL Concept, Responsive Testing & Direct Founder Oversight";
+      : "Includes: Full Design, 3D WebGL Concept & Direct Founder Oversight";
   }
 }
 
 window.applyEstimateToContact = function() {
+  if (typeof studioData === "undefined" || !studioData.estimator) return;
   const { serviceTypes, pagesCount, addons } = studioData.estimator;
   const currentService = serviceTypes.find(s => s.id === estimatorState.serviceId);
   const currentPage = pagesCount.find(p => p.id === estimatorState.pageTier);
@@ -462,17 +293,15 @@ Let's discuss my project goals and prepare a free demo concept!`;
 };
 
 /* ==========================================================================
-   7. Scratch & Reveal Interactive Playground
+   5. Scratch & Reveal
    ========================================================================== */
 function initScratchCard() {
   const canvas = document.getElementById("scratch-canvas");
   if (!canvas) return;
 
   const ctx = canvas.getContext("2d");
-  const box = canvas.parentElement;
-  
-  canvas.width = box.offsetWidth || 400;
-  canvas.height = box.offsetHeight || 220;
+  canvas.width = 440;
+  canvas.height = 240;
 
   ctx.fillStyle = "#1e3828";
   ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -487,29 +316,30 @@ function initScratchCard() {
   ctx.fillText("Drag mouse or finger across the card", canvas.width / 2, canvas.height / 2 + 18);
 
   let isDrawing = false;
-  let scratchedPixels = 0;
+  let scratchedCount = 0;
   let isRevealed = false;
 
   function scratch(x, y) {
     ctx.globalCompositeOperation = "destination-out";
     ctx.beginPath();
-    ctx.arc(x, y, 22, 0, Math.PI * 2);
+    ctx.arc(x, y, 24, 0, Math.PI * 2);
     ctx.fill();
 
-    if (!isRevealed) {
-      checkScratchPercentage();
-    }
-  }
-
-  function checkScratchPercentage() {
-    scratchedPixels++;
-    if (scratchedPixels > 30) {
+    scratchedCount++;
+    if (!isRevealed && scratchedCount > 25) {
       isRevealed = true;
       canvas.style.opacity = "0";
       setTimeout(() => {
         canvas.style.display = "none";
-        triggerConfetti();
-      }, 400);
+        if (typeof confetti === "function") {
+          confetti({
+            particleCount: 50,
+            spread: 60,
+            origin: { y: 0.6 },
+            colors: ['#2d5a27', '#047857', '#0369a1', '#86efac']
+          });
+        }
+      }, 350);
     }
   }
 
@@ -518,8 +348,8 @@ function initScratchCard() {
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     return {
-      x: clientX - rect.left,
-      y: clientY - rect.top
+      x: ((clientX - rect.left) / rect.width) * canvas.width,
+      y: ((clientY - rect.top) / rect.height) * canvas.height
     };
   }
 
@@ -552,65 +382,9 @@ function initScratchCard() {
   window.addEventListener("touchend", () => { isDrawing = false; }, { passive: true });
 }
 
-function triggerConfetti() {
-  if (typeof confetti === "function") {
-    confetti({
-      particleCount: 60,
-      spread: 60,
-      origin: { y: 0.6 },
-      colors: ['#2d5a27', '#047857', '#0369a1', '#86efac']
-    });
-  }
-}
-
 /* ==========================================================================
-   8. Testimonials & Accessible FAQ
+   6. FAQ Accordion
    ========================================================================== */
-function renderTestimonials() {
-  const container = document.getElementById("testimonials-grid");
-  if (!container || !studioData.testimonials) return;
-
-  container.innerHTML = studioData.testimonials.map(t => `
-    <article class="tilt-card glass-panel rounded-2xl p-6 lg:p-7 border border-slate-200 dark:border-white/10 hover:border-emerald-600 transition-all flex flex-col justify-between shadow-sm" aria-label="Review by ${t.author}">
-      <div class="mb-6">
-        <div class="flex text-emerald-700 dark:text-emerald-400 gap-1 mb-4" aria-label="Rating: 5 out of 5 stars">
-          <i data-lucide="star" class="w-4 h-4 fill-current" aria-hidden="true"></i>
-          <i data-lucide="star" class="w-4 h-4 fill-current" aria-hidden="true"></i>
-          <i data-lucide="star" class="w-4 h-4 fill-current" aria-hidden="true"></i>
-          <i data-lucide="star" class="w-4 h-4 fill-current" aria-hidden="true"></i>
-          <i data-lucide="star" class="w-4 h-4 fill-current" aria-hidden="true"></i>
-        </div>
-        <p class="text-slate-800 dark:text-slate-200 text-sm leading-relaxed italic">"${t.quote}"</p>
-      </div>
-
-      <div class="flex items-center gap-3 pt-4 border-t border-slate-200 dark:border-white/10">
-        <img src="${t.avatar}" alt="Photo of ${t.author}" width="40" height="40" loading="lazy" class="w-10 h-10 rounded-full object-cover border border-emerald-500/40">
-        <div>
-          <div class="text-sm font-bold text-slate-900 dark:text-white">${t.author}</div>
-          <div class="text-xs text-slate-600 dark:text-slate-400 font-medium">${t.role}, <span class="text-emerald-800 dark:text-emerald-300 font-semibold">${t.company}</span></div>
-        </div>
-      </div>
-    </article>
-  `).join('');
-}
-
-function renderFaqs() {
-  const container = document.getElementById("faqs-container");
-  if (!container || !studioData.faqs) return;
-
-  container.innerHTML = studioData.faqs.map((faq, index) => `
-    <div class="glass-panel rounded-xl border border-slate-200 dark:border-white/10 overflow-hidden transition-all shadow-sm">
-      <button onclick="toggleFaq(${index})" id="faq-btn-${index}" aria-expanded="false" aria-controls="faq-answer-${index}" class="w-full p-5 text-left flex items-center justify-between gap-4 hover:text-emerald-800 dark:hover:text-emerald-300 transition-colors focus:ring-2 focus:ring-emerald-600">
-        <span class="font-bold text-sm lg:text-base text-slate-900 dark:text-white font-display">${faq.q}</span>
-        <i data-lucide="chevron-down" id="faq-icon-${index}" class="w-5 h-5 text-emerald-700 dark:text-emerald-400 shrink-0 transition-transform duration-300" aria-hidden="true"></i>
-      </button>
-      <div id="faq-answer-${index}" role="region" aria-labelledby="faq-btn-${index}" class="px-5 pb-5 text-xs lg:text-sm text-slate-700 dark:text-slate-300 leading-relaxed hidden">
-        ${faq.a}
-      </div>
-    </div>
-  `).join('');
-}
-
 window.toggleFaq = function(index) {
   const ans = document.getElementById(`faq-answer-${index}`);
   const icon = document.getElementById(`faq-icon-${index}`);
@@ -630,10 +404,10 @@ window.toggleFaq = function(index) {
 };
 
 /* ==========================================================================
-   9. 3D Tilt Cards (Optimized: Cached Rects, Zero Layout Thrashing)
+   7. 3D Tilt Cards (Cached Rects - Zero Layout Thrashing)
    ========================================================================== */
 function initTiltCards() {
-  if (window.matchMedia('(pointer: coarse)').matches) return; // Skip on mobile for 100% speed
+  if (window.matchMedia('(pointer: coarse)').matches) return;
 
   const cards = document.querySelectorAll(".tilt-card");
   cards.forEach(card => {
@@ -651,8 +425,8 @@ function initTiltCards() {
       const centerX = rect.width / 2;
       const centerY = rect.height / 2;
       
-      const rotateX = ((y - centerY) / centerY) * -5;
-      const rotateY = ((x - centerX) / centerX) * 5;
+      const rotateX = ((y - centerY) / centerY) * -4;
+      const rotateY = ((x - centerX) / centerX) * 4;
       
       card.style.transform = `perspective(800px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-2px)`;
     }, { passive: true });
@@ -665,7 +439,7 @@ function initTiltCards() {
 }
 
 /* ==========================================================================
-   10. Typewriter Headline Loop
+   8. Typewriter Headline Loop
    ========================================================================== */
 function initTypewriter() {
   const el = document.getElementById("typewriter-text");
@@ -710,7 +484,7 @@ function initTypewriter() {
 }
 
 /* ==========================================================================
-   11. Contact Form & Toast Feedback
+   9. Contact Form & Toast
    ========================================================================== */
 function initContactForm() {
   const form = document.getElementById("agency-contact-form");
@@ -733,7 +507,16 @@ function initContactForm() {
     setTimeout(() => {
       submitBtn.disabled = false;
       submitBtn.innerHTML = originalText;
-      showToast("Thank you! Your enquiry has been received. Dhruv & Amisha will get back to you shortly.");
+      
+      const toast = document.getElementById("feedback-toast");
+      if (toast) {
+        toast.classList.remove("translate-y-24", "opacity-0");
+        toast.classList.add("translate-y-0", "opacity-100");
+        setTimeout(() => {
+          toast.classList.remove("translate-y-0", "opacity-100");
+          toast.classList.add("translate-y-24", "opacity-0");
+        }, 4500);
+      }
       form.reset();
 
       const mailtoLink = `mailto:Dhruv.sahani.work@gmail.com?subject=New Project Request from ${encodeURIComponent(name)} - ${encodeURIComponent(service)}&body=${encodeURIComponent(message)}%0A%0AFrom: ${encodeURIComponent(name)} (${encodeURIComponent(email)})`;
@@ -742,23 +525,8 @@ function initContactForm() {
   });
 }
 
-function showToast(msg) {
-  const toast = document.getElementById("feedback-toast");
-  const msgEl = document.getElementById("toast-message");
-  if (!toast || !msgEl) return;
-
-  msgEl.innerText = msg;
-  toast.classList.remove("translate-y-24", "opacity-0");
-  toast.classList.add("translate-y-0", "opacity-100");
-
-  setTimeout(() => {
-    toast.classList.remove("translate-y-0", "opacity-100");
-    toast.classList.add("translate-y-24", "opacity-0");
-  }, 4500);
-}
-
 /* ==========================================================================
-   12. Mobile Navigation Drawer
+   10. Mobile Nav Drawer
    ========================================================================== */
 function initMobileNav() {
   const menuBtn = document.getElementById("mobile-menu-btn");
@@ -790,7 +558,7 @@ function initMobileNav() {
 }
 
 /* ==========================================================================
-   13. Lightweight Custom Magnetic Cursor
+   11. Magnetic Cursor (Desktop Only)
    ========================================================================== */
 function initCustomCursor() {
   if (window.matchMedia('(pointer: coarse)').matches || window.innerWidth < 1024) return;
@@ -809,19 +577,18 @@ function initCustomCursor() {
     cursor.style.top = `${mouseY}px`;
   }, { passive: true });
 
-  let rafId = null;
   function renderFollower() {
     followerX += (mouseX - followerX) * 0.2;
     followerY += (mouseY - followerY) * 0.2;
     follower.style.left = `${followerX}px`;
     follower.style.top = `${followerY}px`;
-    rafId = requestAnimationFrame(renderFollower);
+    requestAnimationFrame(renderFollower);
   }
   renderFollower();
 }
 
 /* ==========================================================================
-   14. Scrollspy Navigation
+   12. Scrollspy Navigation
    ========================================================================== */
 function initScrollspy() {
   const sections = document.querySelectorAll("section[id]");
