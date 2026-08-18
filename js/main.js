@@ -1,0 +1,835 @@
+﻿/**
+ * D&A Web Studio - Main Interactive Controller (Light & Modern Theme)
+ * Dynamic rendering, 3D card tilt physics, modal managers, scope estimator, scratch card, and animations.
+ */
+
+document.addEventListener("DOMContentLoaded", () => {
+  initTheme();
+  renderFounders();
+  renderServices();
+  renderCaseStudies();
+  renderProcess();
+  renderPrinciples();
+  renderEstimator();
+  renderTestimonials();
+  renderFaqs();
+  initTiltCards();
+  initTypewriter();
+  initScratchCard();
+  initContactForm();
+  initMobileNav();
+  initCustomCursor();
+  initScrollspy();
+  if (typeof lucide !== "undefined") {
+    lucide.createIcons();
+  }
+});
+
+/* ==========================================================================
+   1. Theme Switcher (Light Default / Dark Option)
+   ========================================================================== */
+function initTheme() {
+  const toggleBtn = document.getElementById("theme-toggle");
+  const currentTheme = localStorage.getItem("da_theme") || "light";
+
+  if (currentTheme === "dark") {
+    document.documentElement.classList.add("dark");
+    document.documentElement.classList.remove("light");
+    updateThemeIcon(false);
+  } else {
+    document.documentElement.classList.remove("dark");
+    document.documentElement.classList.add("light");
+    updateThemeIcon(true);
+  }
+
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", () => {
+      const isDark = document.documentElement.classList.toggle("dark");
+      document.documentElement.classList.toggle("light", !isDark);
+      localStorage.setItem("da_theme", isDark ? "dark" : "light");
+      updateThemeIcon(!isDark);
+    });
+  }
+}
+
+function updateThemeIcon(isLight) {
+  const icon = document.getElementById("theme-icon");
+  if (icon) {
+    icon.setAttribute("data-lucide", isLight ? "moon" : "sun");
+    if (typeof lucide !== "undefined") lucide.createIcons();
+  }
+}
+
+/* ==========================================================================
+   2. Render Founders (Dhruv & Amisha)
+   ========================================================================== */
+function renderFounders() {
+  const container = document.getElementById("founders-container");
+  if (!container || !studioData.founders) return;
+
+  container.innerHTML = studioData.founders.map(founder => `
+    <div class="tilt-card glass-panel rounded-3xl p-6 lg:p-8 flex flex-col md:flex-row gap-8 items-start border border-slate-200/80 dark:border-white/10 hover:border-emerald-500/40 transition-all">
+      <div class="tilt-inner w-full md:w-5/12 shrink-0">
+        <div class="founder-portrait rounded-2xl border border-slate-200/80 dark:border-white/15 overflow-hidden shadow-xl relative">
+          <img src="${founder.image}" alt="${founder.name}" class="w-full h-full object-cover">
+          <div class="absolute bottom-4 left-4 right-4 z-10">
+            <span class="inline-block px-3 py-1 bg-white/90 dark:bg-emerald-950/80 backdrop-blur-md border border-emerald-500/40 text-emerald-800 dark:text-emerald-300 text-xs font-semibold rounded-full uppercase tracking-wider shadow-sm">
+              ${founder.role.split('/')[0].trim()}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div class="tilt-inner flex-1 flex flex-col justify-between h-full">
+        <div>
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-mono uppercase tracking-widest text-emerald-700 dark:text-emerald-400 font-semibold">${founder.role}</span>
+          </div>
+          <h3 class="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white mb-2 font-display">${founder.name}</h3>
+          <p class="text-emerald-700 dark:text-emerald-300/90 text-sm font-medium italic mb-4">"${founder.tagline}"</p>
+          <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-6">${founder.bio}</p>
+          
+          <div class="space-y-2 mb-6">
+            ${founder.points.map(pt => `
+              <div class="flex items-start gap-2.5 text-xs text-slate-600 dark:text-slate-300">
+                <span class="text-emerald-600 dark:text-emerald-400 mt-0.5">✦</span>
+                <span>${pt}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+
+        <div>
+          <div class="flex flex-wrap gap-1.5 mb-6">
+            ${founder.skills.map(skill => `
+              <span class="px-2.5 py-1 rounded-md bg-emerald-50 dark:bg-white/5 border border-emerald-200/60 dark:border-white/10 text-[11px] font-medium text-emerald-900 dark:text-slate-300">
+                ${skill}
+              </span>
+            `).join('')}
+          </div>
+          <div class="pt-4 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-between">
+            <a href="${founder.socials.email}" class="inline-flex items-center gap-2 text-xs font-bold text-emerald-700 dark:text-emerald-400 hover:text-emerald-600 transition-colors">
+              <i data-lucide="mail" class="w-3.5 h-3.5"></i> Connect with ${founder.name.split(' ')[0]} ↗
+            </a>
+            <span class="text-[11px] text-slate-400 font-medium">Co-Founder D&A</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+/* ==========================================================================
+   3. Render Services Grid & Interactive Modals
+   ========================================================================== */
+function renderServices() {
+  const container = document.getElementById("services-grid");
+  if (!container || !studioData.services) return;
+
+  container.innerHTML = studioData.services.map(srv => `
+    <div class="tilt-card glass-panel rounded-2xl p-6 lg:p-7 flex flex-col justify-between border border-slate-200/80 dark:border-white/10 hover:border-emerald-500/50 group transition-all cursor-pointer shadow-sm" onclick="openServiceModal('${srv.id}')">
+      <div>
+        <div class="flex items-center justify-between mb-5">
+          <span class="text-xs font-mono text-emerald-700 dark:text-emerald-400 font-bold tracking-wider">${srv.num} / ${srv.category}</span>
+          <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-500/10 border border-emerald-300 dark:border-emerald-500/30 text-[10px] font-semibold text-emerald-800 dark:text-emerald-300">
+            ${srv.badge}
+          </span>
+        </div>
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-100 to-teal-100 dark:from-emerald-500/20 dark:to-teal-900/30 border border-emerald-300/80 dark:border-emerald-500/30 flex items-center justify-center text-emerald-700 dark:text-emerald-300 mb-4 group-hover:scale-110 group-hover:bg-emerald-200 dark:group-hover:bg-emerald-500/30 transition-all">
+          <i data-lucide="${srv.icon}" class="w-6 h-6"></i>
+        </div>
+        <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2.5 font-display group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors">${srv.title}</h3>
+        <p class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed mb-6">${srv.shortDesc}</p>
+        
+        <ul class="space-y-2 mb-6 text-xs text-slate-600 dark:text-slate-300">
+          ${srv.features.slice(0, 3).map(f => `
+            <li class="flex items-center gap-2">
+              <i data-lucide="check" class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0"></i>
+              <span>${f}</span>
+            </li>
+          `).join('')}
+        </ul>
+      </div>
+
+      <div class="pt-4 border-t border-slate-200/80 dark:border-white/10 flex items-center justify-between">
+        <span class="text-xs font-bold text-emerald-700 dark:text-emerald-400 group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+          Explore Deliverables <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+        </span>
+        <span class="text-[11px] text-slate-400 font-mono">D&A Standard</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+window.openServiceModal = function(serviceId) {
+  const service = studioData.services.find(s => s.id === serviceId);
+  if (!service) return;
+
+  const modal = document.getElementById("general-modal");
+  const modalContent = document.getElementById("modal-dynamic-content");
+  
+  modalContent.innerHTML = `
+    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200 dark:border-white/10">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-lg bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-300 dark:border-emerald-500/40 flex items-center justify-center text-emerald-700 dark:text-emerald-300">
+          <i data-lucide="${service.icon}" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <span class="text-xs font-mono text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">${service.category}</span>
+          <h2 class="text-xl font-bold text-slate-900 dark:text-white font-display">${service.title}</h2>
+        </div>
+      </div>
+      <button onclick="closeModal()" class="p-2 rounded-lg bg-slate-100 dark:bg-white/5 hover:bg-slate-200 text-slate-500 dark:text-slate-400 transition-colors">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <p class="text-slate-700 dark:text-slate-200 text-sm leading-relaxed mb-6">${service.fullDesc}</p>
+
+    <div class="mb-6">
+      <h4 class="text-xs font-mono uppercase tracking-wider text-emerald-700 dark:text-emerald-400 font-bold mb-3">Key Deliverables & Standards</h4>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+        ${service.features.map(f => `
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 flex items-start gap-2.5 text-xs text-slate-700 dark:text-slate-300">
+            <i data-lucide="check-circle" class="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5"></i>
+            <span>${f}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="mb-6">
+      <h4 class="text-xs font-mono uppercase tracking-wider text-slate-500 dark:text-slate-400 font-semibold mb-2">Tech Stack & Frameworks</h4>
+      <div class="flex flex-wrap gap-2">
+        ${service.tags.map(tag => `
+          <span class="px-2.5 py-1 rounded-md bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/20 text-xs font-medium text-emerald-800 dark:text-emerald-300">
+            ${tag}
+          </span>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="pt-4 border-t border-slate-200 dark:border-white/10 flex items-center justify-between">
+      <button onclick="closeModal(); document.getElementById('contact').scrollIntoView({behavior: 'smooth'})" class="btn-primary px-5 py-2.5 rounded-xl text-xs flex items-center gap-2">
+        Request Free Demo / Consultation <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+      </button>
+      <span class="text-xs text-slate-500 dark:text-slate-400">Led directly by Dhruv & Amisha</span>
+    </div>
+  `;
+
+  modal.classList.add("open");
+  if (typeof lucide !== "undefined") lucide.createIcons();
+};
+
+/* ==========================================================================
+   4. Render Case Studies & Interactive Filter Tabs
+   ========================================================================== */
+function renderCaseStudies(filter = "All") {
+  const container = document.getElementById("case-studies-grid");
+  if (!container || !studioData.caseStudies) return;
+
+  const filtered = filter === "All"
+    ? studioData.caseStudies
+    : studioData.caseStudies.filter(c => c.category.toLowerCase().includes(filter.toLowerCase()));
+
+  container.innerHTML = filtered.map(item => `
+    <div class="tilt-card glass-panel rounded-2xl overflow-hidden border border-slate-200/80 dark:border-white/10 hover:border-emerald-500/50 transition-all flex flex-col justify-between group shadow-sm">
+      <div class="relative h-48 overflow-hidden">
+        <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+        <div class="absolute top-3 left-3">
+          <span class="px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-md border border-white/20 text-[11px] font-medium text-white">
+            ${item.category}
+          </span>
+        </div>
+        <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+          <span class="text-xs font-semibold text-emerald-300 font-mono bg-slate-900/90 px-2.5 py-1 rounded-md border border-emerald-500/40">
+            ${item.metric}
+          </span>
+          <span class="text-[11px] text-slate-300 font-mono bg-black/60 px-2 py-0.5 rounded">
+            ${item.duration}
+          </span>
+        </div>
+      </div>
+
+      <div class="p-6 flex-1 flex flex-col justify-between">
+        <div>
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2 font-display group-hover:text-emerald-700 dark:group-hover:text-emerald-300 transition-colors">${item.title}</h3>
+          <p class="text-slate-600 dark:text-slate-300 text-xs leading-relaxed mb-4">${item.description}</p>
+        </div>
+
+        <div>
+          <div class="flex flex-wrap gap-1.5 mb-4">
+            ${item.tags.map(t => `<span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-white/5 text-[10px] text-slate-600 dark:text-slate-300">${t}</span>`).join('')}
+          </div>
+          <button onclick="openCaseModal('${item.id}')" class="w-full py-2.5 rounded-xl bg-slate-50 dark:bg-white/5 hover:bg-emerald-50 dark:hover:bg-emerald-500/20 border border-slate-200 dark:border-white/10 hover:border-emerald-400 text-xs font-bold text-emerald-800 dark:text-emerald-300 transition-all flex items-center justify-center gap-1.5">
+            Inspect Architecture & Metrics <i data-lucide="arrow-up-right" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  if (typeof lucide !== "undefined") lucide.createIcons();
+}
+
+window.filterCaseStudies = function(category, btnElement) {
+  document.querySelectorAll(".filter-btn").forEach(btn => {
+    btn.classList.remove("btn-primary", "text-white", "font-bold");
+    btn.classList.add("bg-white/80", "dark:bg-white/5", "text-slate-700", "dark:text-slate-300");
+  });
+  if (btnElement) {
+    btnElement.classList.remove("bg-white/80", "dark:bg-white/5", "text-slate-700", "dark:text-slate-300");
+    btnElement.classList.add("btn-primary", "text-white", "font-bold");
+  }
+  renderCaseStudies(category);
+  initTiltCards();
+};
+
+window.openCaseModal = function(caseId) {
+  const item = studioData.caseStudies.find(c => c.id === caseId);
+  if (!item) return;
+
+  const modal = document.getElementById("general-modal");
+  const modalContent = document.getElementById("modal-dynamic-content");
+
+  modalContent.innerHTML = `
+    <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200 dark:border-white/10">
+      <div>
+        <span class="text-xs font-mono text-emerald-700 dark:text-emerald-400 uppercase tracking-widest">${item.client}</span>
+        <h2 class="text-xl font-bold text-slate-900 dark:text-white font-display">${item.title}</h2>
+      </div>
+      <button onclick="closeModal()" class="p-2 rounded-lg bg-slate-100 dark:bg-white/5 text-slate-500 hover:text-slate-900 transition-colors">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+    </div>
+
+    <div class="rounded-xl overflow-hidden mb-6 max-h-60 border border-slate-200 dark:border-white/10">
+      <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover">
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
+      <div class="p-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-center">
+        <div class="text-xs text-slate-500 dark:text-slate-400">Outcome Metric</div>
+        <div class="text-base font-bold text-emerald-700 dark:text-emerald-400 font-mono">${item.metric}</div>
+      </div>
+      <div class="p-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-center">
+        <div class="text-xs text-slate-500 dark:text-slate-400">Timeline</div>
+        <div class="text-base font-bold text-slate-900 dark:text-white font-mono">${item.duration}</div>
+      </div>
+      <div class="p-3 rounded-xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-center col-span-2 sm:col-span-1">
+        <div class="text-xs text-slate-500 dark:text-slate-400">Category</div>
+        <div class="text-base font-bold text-teal-700 dark:text-teal-300">${item.category}</div>
+      </div>
+    </div>
+
+    <p class="text-slate-700 dark:text-slate-200 text-sm leading-relaxed mb-6">${item.description} Tailored to eliminate friction and maximize conversion clarity.</p>
+
+    <div class="pt-4 border-t border-slate-200 dark:border-white/10 flex items-center justify-between">
+      <button onclick="closeModal(); document.getElementById('contact').scrollIntoView({behavior: 'smooth'})" class="btn-primary px-5 py-2.5 rounded-xl text-xs flex items-center gap-2">
+        Build a Project Like This <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+      </button>
+      <span class="text-xs text-slate-500 dark:text-slate-400">D&A Web Studio</span>
+    </div>
+  `;
+
+  modal.classList.add("open");
+  if (typeof lucide !== "undefined") lucide.createIcons();
+};
+
+window.closeModal = function() {
+  const modal = document.getElementById("general-modal");
+  if (modal) modal.classList.remove("open");
+};
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") closeModal();
+});
+/* ==========================================================================
+   5. Render Principles & Process
+   ========================================================================== */
+function renderPrinciples() {
+  const container = document.getElementById("principles-grid");
+  if (!container || !studioData.principles) return;
+
+  container.innerHTML = studioData.principles.map(p => `
+    <div class="tilt-card glass-panel rounded-2xl p-6 border border-slate-200/80 dark:border-white/10 hover:border-emerald-500/40 transition-all shadow-sm">
+      <div class="text-xs font-mono text-emerald-700 dark:text-emerald-400 font-bold mb-3">${p.num} / STANDARD</div>
+      <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2 font-display">${p.title}</h3>
+      <p class="text-slate-600 dark:text-slate-300 text-xs leading-relaxed">${p.description}</p>
+    </div>
+  `).join('');
+}
+
+function renderProcess() {
+  const container = document.getElementById("process-steps");
+  if (!container || !studioData.process) return;
+
+  container.innerHTML = studioData.process.map(step => `
+    <div class="relative p-6 rounded-2xl glass-panel border border-slate-200/80 dark:border-white/10 hover:border-emerald-500/40 transition-all shadow-sm">
+      <div class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-500/20 border border-emerald-300 dark:border-emerald-500/30 text-emerald-800 dark:text-emerald-300 font-mono font-bold flex items-center justify-center mb-4">
+        ${step.step}
+      </div>
+      <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2 font-display">${step.title}</h3>
+      <p class="text-slate-600 dark:text-slate-300 text-xs leading-relaxed">${step.desc}</p>
+    </div>
+  `).join('');
+}
+
+/* ==========================================================================
+   6. Interactive Project Scope Estimator (No Pricing / Pure Scope & Timeline)
+   ========================================================================== */
+let estimatorState = {
+  serviceId: "web",
+  pageTier: "single",
+  selectedAddons: new Set()
+};
+
+function renderEstimator() {
+  calculateEstimatorTotal();
+}
+
+window.selectEstimatorService = function(serviceId, el) {
+  estimatorState.serviceId = serviceId;
+  document.querySelectorAll(".service-chip").forEach(c => c.classList.remove("active"));
+  el.classList.add("active");
+  calculateEstimatorTotal();
+};
+
+window.selectEstimatorPages = function(pageId, el) {
+  estimatorState.pageTier = pageId;
+  document.querySelectorAll(".page-chip").forEach(c => c.classList.remove("active"));
+  el.classList.add("active");
+  calculateEstimatorTotal();
+};
+
+window.toggleEstimatorAddon = function(addonId, el) {
+  if (estimatorState.selectedAddons.has(addonId)) {
+    estimatorState.selectedAddons.delete(addonId);
+    el.classList.remove("active");
+  } else {
+    estimatorState.selectedAddons.add(addonId);
+    el.classList.add("active");
+  }
+  calculateEstimatorTotal();
+};
+
+function calculateEstimatorTotal() {
+  const { serviceTypes, pagesCount, addons } = studioData.estimator;
+  
+  const currentService = serviceTypes.find(s => s.id === estimatorState.serviceId) || serviceTypes[0];
+  const currentPage = pagesCount.find(p => p.id === estimatorState.pageTier) || pagesCount[0];
+
+  const scopeDisplay = document.getElementById("estimator-scope-display");
+  const timeEl = document.getElementById("estimator-time-display");
+  const deliverablesEl = document.getElementById("estimator-deliverables-display");
+
+  if (scopeDisplay) {
+    scopeDisplay.innerText = `${currentService.name} (${currentPage.label})`;
+  }
+  if (timeEl) {
+    timeEl.innerText = currentService.time;
+  }
+  if (deliverablesEl) {
+    const addonNames = Array.from(estimatorState.selectedAddons)
+      .map(id => addons.find(a => a.id === id)?.name)
+      .filter(Boolean);
+    deliverablesEl.innerText = addonNames.length > 0 
+      ? `Includes: Core Architecture + ${addonNames.join(", ")}` 
+      : "Includes: Full Design, 3D WebGL Concept, Responsive Testing & Direct Founder Oversight";
+  }
+}
+
+window.applyEstimateToContact = function() {
+  const { serviceTypes, pagesCount, addons } = studioData.estimator;
+  const currentService = serviceTypes.find(s => s.id === estimatorState.serviceId);
+  const currentPage = pagesCount.find(p => p.id === estimatorState.pageTier);
+  const addonNames = Array.from(estimatorState.selectedAddons)
+    .map(id => addons.find(a => a.id === id)?.name)
+    .filter(Boolean);
+
+  const messageField = document.getElementById("contact-message");
+  if (messageField) {
+    messageField.value = `Hi Dhruv & Amisha, I selected the following project scope on your website:
+- Service: ${currentService?.name}
+- Scope: ${currentPage?.label}
+- Estimated Timeline: ${currentService?.time}
+- Add-ons: ${addonNames.join(", ") || "None"}
+
+Let's discuss my project goals and prepare a free demo concept!`;
+  }
+
+  document.getElementById("contact").scrollIntoView({ behavior: "smooth" });
+};
+
+/* ==========================================================================
+   7. Scratch & Reveal Interactive Playground
+   ========================================================================== */
+function initScratchCard() {
+  const canvas = document.getElementById("scratch-canvas");
+  if (!canvas) return;
+
+  const ctx = canvas.getContext("2d");
+  const box = canvas.parentElement;
+  
+  canvas.width = box.offsetWidth || 400;
+  canvas.height = box.offsetHeight || 220;
+
+  ctx.fillStyle = "#2d4436";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "#93ab88";
+  ctx.font = "bold 14px 'Space Grotesk', sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("✦ SCRATCH HERE TO REVEAL ✦", canvas.width / 2, canvas.height / 2 - 10);
+  
+  ctx.fillStyle = "#cbd5e1";
+  ctx.font = "12px sans-serif";
+  ctx.fillText("Drag mouse or finger across the card", canvas.width / 2, canvas.height / 2 + 18);
+
+  let isDrawing = false;
+  let scratchedPixels = 0;
+  let isRevealed = false;
+
+  function scratch(x, y) {
+    ctx.globalCompositeOperation = "destination-out";
+    ctx.beginPath();
+    ctx.arc(x, y, 24, 0, Math.PI * 2);
+    ctx.fill();
+
+    if (!isRevealed) {
+      checkScratchPercentage();
+    }
+  }
+
+  function checkScratchPercentage() {
+    scratchedPixels++;
+    if (scratchedPixels > 35) {
+      isRevealed = true;
+      canvas.style.opacity = "0";
+      setTimeout(() => {
+        canvas.style.display = "none";
+        triggerConfetti();
+      }, 500);
+    }
+  }
+
+  function getCoords(e) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+      x: clientX - rect.left,
+      y: clientY - rect.top
+    };
+  }
+
+  canvas.addEventListener("mousedown", (e) => {
+    isDrawing = true;
+    const { x, y } = getCoords(e);
+    scratch(x, y);
+  });
+
+  window.addEventListener("mouseup", () => { isDrawing = false; });
+
+  canvas.addEventListener("mousemove", (e) => {
+    if (!isDrawing) return;
+    const { x, y } = getCoords(e);
+    scratch(x, y);
+  });
+
+  canvas.addEventListener("touchstart", (e) => {
+    isDrawing = true;
+    const { x, y } = getCoords(e);
+    scratch(x, y);
+  });
+
+  canvas.addEventListener("touchmove", (e) => {
+    if (!isDrawing) return;
+    const { x, y } = getCoords(e);
+    scratch(x, y);
+  });
+
+  window.addEventListener("touchend", () => { isDrawing = false; });
+}
+
+function triggerConfetti() {
+  if (typeof confetti === "function") {
+    confetti({
+      particleCount: 80,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#456138', '#059669', '#0284c7', '#93ab88']
+    });
+  }
+}
+
+/* ==========================================================================
+   8. Testimonials & FAQ
+   ========================================================================== */
+function renderTestimonials() {
+  const container = document.getElementById("testimonials-grid");
+  if (!container || !studioData.testimonials) return;
+
+  container.innerHTML = studioData.testimonials.map(t => `
+    <div class="tilt-card glass-panel rounded-2xl p-6 lg:p-7 border border-slate-200/80 dark:border-white/10 hover:border-emerald-500/40 transition-all flex flex-col justify-between shadow-sm">
+      <div class="mb-6">
+        <div class="flex text-emerald-600 dark:text-emerald-400 gap-1 mb-4">
+          <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+          <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+          <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+          <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+          <i data-lucide="star" class="w-4 h-4 fill-current"></i>
+        </div>
+        <p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed italic">"${t.quote}"</p>
+      </div>
+
+      <div class="flex items-center gap-3 pt-4 border-t border-slate-200/80 dark:border-white/10">
+        <img src="${t.avatar}" alt="${t.author}" class="w-10 h-10 rounded-full object-cover border border-emerald-500/40">
+        <div>
+          <div class="text-sm font-bold text-slate-900 dark:text-white">${t.author}</div>
+          <div class="text-xs text-slate-500 dark:text-slate-400">${t.role}, <span class="text-emerald-700 dark:text-emerald-400 font-semibold">${t.company}</span></div>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderFaqs() {
+  const container = document.getElementById("faqs-container");
+  if (!container || !studioData.faqs) return;
+
+  container.innerHTML = studioData.faqs.map((faq, index) => `
+    <div class="glass-panel rounded-xl border border-slate-200/80 dark:border-white/10 overflow-hidden transition-all shadow-sm">
+      <button onclick="toggleFaq(${index})" class="w-full p-5 text-left flex items-center justify-between gap-4 hover:text-emerald-700 dark:hover:text-emerald-300 transition-colors">
+        <span class="font-bold text-sm lg:text-base text-slate-900 dark:text-white font-display">${faq.q}</span>
+        <i data-lucide="chevron-down" id="faq-icon-${index}" class="w-5 h-5 text-emerald-700 dark:text-emerald-400 shrink-0 transition-transform duration-300"></i>
+      </button>
+      <div id="faq-answer-${index}" class="px-5 pb-5 text-xs lg:text-sm text-slate-600 dark:text-slate-300 leading-relaxed hidden">
+        ${faq.a}
+      </div>
+    </div>
+  `).join('');
+}
+
+window.toggleFaq = function(index) {
+  const ans = document.getElementById(`faq-answer-${index}`);
+  const icon = document.getElementById(`faq-icon-${index}`);
+  if (!ans || !icon) return;
+
+  const isHidden = ans.classList.contains("hidden");
+  if (isHidden) {
+    ans.classList.remove("hidden");
+    icon.style.transform = "rotate(180deg)";
+  } else {
+    ans.classList.add("hidden");
+    icon.style.transform = "rotate(0deg)";
+  }
+};
+
+/* ==========================================================================
+   9. 3D Tilt Cards
+   ========================================================================== */
+function initTiltCards() {
+  const cards = document.querySelectorAll(".tilt-card");
+  cards.forEach(card => {
+    card.addEventListener("mousemove", (e) => {
+      const rect = card.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      
+      const rotateX = ((y - centerY) / centerY) * -6;
+      const rotateY = ((x - centerX) / centerX) * 6;
+      
+      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) translateY(-3px)`;
+    });
+
+    card.addEventListener("mouseleave", () => {
+      card.style.transform = "perspective(1000px) rotateX(0deg) rotateY(0deg) translateY(0px)";
+    });
+  });
+}
+
+/* ==========================================================================
+   10. Typewriter Headline Loop
+   ========================================================================== */
+function initTypewriter() {
+  const el = document.getElementById("typewriter-text");
+  if (!el) return;
+
+  const phrases = [
+    "Websites that work everywhere.",
+    "3D Experiences that captivate.",
+    "Support Systems that scale.",
+    "Digital Brands that convert."
+  ];
+
+  let phraseIndex = 0;
+  let charIndex = 0;
+  let isDeleting = false;
+
+  function type() {
+    const current = phrases[phraseIndex];
+    if (isDeleting) {
+      el.innerText = current.substring(0, charIndex - 1);
+      charIndex--;
+    } else {
+      el.innerText = current.substring(0, charIndex + 1);
+      charIndex++;
+    }
+
+    let delay = isDeleting ? 40 : 80;
+
+    if (!isDeleting && charIndex === current.length) {
+      delay = 2000;
+      isDeleting = true;
+    } else if (isDeleting && charIndex === 0) {
+      isDeleting = false;
+      phraseIndex = (phraseIndex + 1) % phrases.length;
+      delay = 400;
+    }
+
+    setTimeout(type, delay);
+  }
+
+  type();
+}
+
+/* ==========================================================================
+   11. Contact Form & Toast Feedback
+   ========================================================================== */
+function initContactForm() {
+  const form = document.getElementById("agency-contact-form");
+  if (!form) return;
+
+  form.addEventListener("submit", (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById("contact-name")?.value || "";
+    const email = document.getElementById("contact-email")?.value || "";
+    const service = document.getElementById("contact-service")?.value || "3D Website";
+    const message = document.getElementById("contact-message")?.value || "";
+
+    const submitBtn = form.querySelector("button[type='submit']");
+    const originalText = submitBtn.innerHTML;
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<span>Sending Request...</span>`;
+
+    setTimeout(() => {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = originalText;
+      showToast("Thank you! Your enquiry has been received. Dhruv & Amisha will get back to you shortly.");
+      form.reset();
+
+      const mailtoLink = `mailto:Dhruv.sahani.work@gmail.com?subject=New Project Request from ${encodeURIComponent(name)} - ${encodeURIComponent(service)}&body=${encodeURIComponent(message)}%0A%0AFrom: ${encodeURIComponent(name)} (${encodeURIComponent(email)})`;
+      window.open(mailtoLink, "_blank");
+    }, 800);
+  });
+}
+
+function showToast(msg) {
+  const toast = document.getElementById("feedback-toast");
+  const msgEl = document.getElementById("toast-message");
+  if (!toast || !msgEl) return;
+
+  msgEl.innerText = msg;
+  toast.classList.remove("translate-y-24", "opacity-0");
+  toast.classList.add("translate-y-0", "opacity-100");
+
+  setTimeout(() => {
+    toast.classList.remove("translate-y-0", "opacity-100");
+    toast.classList.add("translate-y-24", "opacity-0");
+  }, 5000);
+}
+
+/* ==========================================================================
+   12. Mobile Navigation Drawer
+   ========================================================================== */
+function initMobileNav() {
+  const menuBtn = document.getElementById("mobile-menu-btn");
+  const drawer = document.getElementById("mobile-drawer");
+  const closeBtn = document.getElementById("close-drawer-btn");
+
+  if (menuBtn && drawer) {
+    menuBtn.addEventListener("click", () => {
+      drawer.classList.remove("-translate-x-full");
+    });
+  }
+
+  if (closeBtn && drawer) {
+    closeBtn.addEventListener("click", () => {
+      drawer.classList.add("-translate-x-full");
+    });
+  }
+
+  document.querySelectorAll(".mobile-nav-link").forEach(link => {
+    link.addEventListener("click", () => {
+      if (drawer) drawer.classList.add("-translate-x-full");
+    });
+  });
+}
+
+/* ==========================================================================
+   13. Custom Magnetic Cursor
+   ========================================================================== */
+function initCustomCursor() {
+  const cursor = document.querySelector(".custom-cursor");
+  const follower = document.querySelector(".custom-cursor-follower");
+  if (!cursor || !follower) return;
+
+  let mouseX = -100, mouseY = -100;
+  let followerX = -100, followerY = -100;
+
+  document.addEventListener("mousemove", (e) => {
+    mouseX = e.clientX;
+    mouseY = e.clientY;
+    cursor.style.left = `${mouseX}px`;
+    cursor.style.top = `${mouseY}px`;
+  });
+
+  function renderFollower() {
+    followerX += (mouseX - followerX) * 0.18;
+    followerY += (mouseY - followerY) * 0.18;
+    follower.style.left = `${followerX}px`;
+    follower.style.top = `${followerY}px`;
+    requestAnimationFrame(renderFollower);
+  }
+  renderFollower();
+
+  const interactive = document.querySelectorAll("a, button, .tilt-card, .estimator-chip, #scratch-canvas");
+  interactive.forEach(el => {
+    el.addEventListener("mouseenter", () => {
+      cursor.classList.add("active");
+    });
+    el.addEventListener("mouseleave", () => {
+      cursor.classList.remove("active");
+    });
+  });
+}
+
+/* ==========================================================================
+   14. Scrollspy Navigation
+   ========================================================================== */
+function initScrollspy() {
+  const sections = document.querySelectorAll("section[id]");
+  const navLinks = document.querySelectorAll(".nav-link");
+
+  window.addEventListener("scroll", () => {
+    let current = "";
+    sections.forEach(section => {
+      const sectionTop = section.offsetTop - 120;
+      if (window.pageYOffset >= sectionTop) {
+        current = section.getAttribute("id");
+      }
+    });
+
+    navLinks.forEach(link => {
+      link.classList.remove("text-emerald-700", "dark:text-emerald-400", "font-bold");
+      if (link.getAttribute("href") === `#${current}`) {
+        link.classList.add("text-emerald-700", "dark:text-emerald-400", "font-bold");
+      }
+    });
+  });
+}
